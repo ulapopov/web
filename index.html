@@ -1,19 +1,26 @@
-<html>
-<header><title>PG&E Power Outages</title></header>
-<body>
-Power outages in California
-</body>
-</html>
-
-
-
-
 <!DOCTYPE html>
 <html lang="en-gb">
 <header><title>Uliana Popov. PG&E Power Outages</title></header>
 <body>
 <h2>Power Outages in North California</h2>
 
+<h3>The Data</h3>
+<p>Each snapshot contains: Location, Number of Customers, Reason, Time Stamp… </p>
+    
+<h3>Findings</h3>
+<ul>
+    <li>3.7 million (out of 5.4 million) customers were affected</li>
+    <li>The longest shutoff lasted 383 hours (almost 16 days)</li>
+    <li>Average fire outage lasts 4 times longer than “regular” outage, 43.8 vs 10.7 hours</li>
+    <li>More than half (55%) fire outages started during the night, 
+between 10pm and 7am.</li>
+</ul>
+    
+<p>
+    <img src="https://github.com/ulapopov/web/blob/master/SF_scaled2019-10-09%2000:10.png" style="max-width: 100%">
+</p>
+    
+<!--    
 <p>PG&amp;E have <a href="https://twitter.com/bedwardstiek/status/1182047040932470784">cut off power</a> to several million people in northern California, supposedly as a precaution against wildfires.</p>
 
 <p>As it happens, I’ve been scraping and recording PG&amp;E’s outage data every 10 minutes for the past 4+ months. This data got really interesting over the past two days!</p>
@@ -71,7 +78,7 @@ Power outages in California
 <p>The JSON is then committed to my <a href="https://github.com/simonw/pge-outages">pge-outages GitHub repository</a>, over-writing the existing <a href="https://github.com/simonw/pge-outages/blob/master/pge-outages.json">pge-outages.json file</a>. There’s some code that attempts to generate a human-readable commit message, but the historic data itself is saved in the commit history of that single file.</p>
 
 <h3 id="buildingthedatasette">Building the Datasette</h3>
-
+-->
     
 </body>
 </html>
