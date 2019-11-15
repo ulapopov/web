@@ -1,6 +1,77 @@
 <html>
-<header><title>This is title</title></header>
+<header><title>PG&E Power Outages</title></header>
 <body>
-Hello world
+Power outages in California
+</body>
+</html>
+
+
+
+
+<!DOCTYPE html>
+<html lang="en-gb">
+<header><title>Uliana Popov. PG&E Power Outages</title></header>
+<body>
+<h2>Power Outages in North California</h2>
+
+<p>PG&amp;E have <a href="https://twitter.com/bedwardstiek/status/1182047040932470784">cut off power</a> to several million people in northern California, supposedly as a precaution against wildfires.</p>
+
+<p>As it happens, I’ve been scraping and recording PG&amp;E’s outage data every 10 minutes for the past 4+ months. This data got really interesting over the past two days!</p>
+
+<p>The original data lives in <a href="https://github.com/simonw/pge-outages">a GitHub repo</a> (more importantly in <a href="https://github.com/simonw/pge-outages/commits/master">the commit history</a> of that repo).</p>
+
+<p>Reading JSON in a Git repo isn’t particularly productive, so this afternoon I figured out how to transform that data into a SQLite database and publish it with <a href="https://github.com/simonw/datasette">Datasette</a>.</p>
+
+<p>The result is <a href="https://pge-outages.simonwillison.net/">pge-outages.simonwillison.net</a></p>
+
+<h3 id="thedatamodeloutagesandsnapshots">The data model: outages and snapshots</h3>
+
+<p>The three key tables to understand are <code>outages</code>, <code>snapshots</code> and <code>outage_snapshots</code>.</p>
+
+<p>PG&amp;E assign an outage ID to every outage—where an outage is usually something that affects a few dozen customers. I store these in the <a href="https://pge-outages.simonwillison.net/pge-outages/outages?_sort_desc=outageStartTime">outages table</a>.</p>
+
+<p>Every 10 minutes I grab a snapshot of their full JSON file, which reports every single outage that is currently ongoing. I store a record of when I grabbed that snapshot in the <a href="https://pge-outages.simonwillison.net/pge-outages/snapshots?_sort_desc=id">snapshots table</a>.</p>
+
+<p>The most interesting table is <code>outage_snapshots</code>. Every time I see an outage in the JSON feed, I record a new copy of its data as an <code>outage_snapshot</code> row. This allows me to reconstruct the full history of any outage, in 10 minute increments.</p>
+
+<p>Here are <a href="https://pge-outages.simonwillison.net/pge-outages/outage_snapshots?snapshot=1269">all of the outages</a> that were represented in <a href="https://pge-outages.simonwillison.net/pge-outages/snapshots/1269">snapshot 1269</a>—captured at 4:10pm Pacific Time today.</p>
+
+<p>I can run <code>select sum(estCustAffected) from outage_snapshots where snapshot = 1269</code> (<a href="https://pge-outages.simonwillison.net/pge-outages?sql=select+sum%28estCustAffected%29+from+outage_snapshots+where+snapshot+%3D+%3Aid&amp;id=1269">try it here</a>) to count up the total PG&amp;E estimate of the number of affected customers—it’s 545,706!</p>
+
+<p>I’ve installed <a href="https://github.com/simonw/datasette-vega">datasette-vega</a> which means I can render graphs. Here’s my first attempt at a graph showing <a href="https://pge-outages.simonwillison.net/pge-outages?sql=select+snapshots.id%2C+title+as+snapshotTime%2C+hash%2C+sum%28outage_snapshots.estCustAffected%29+as+totalEstCustAffected%0D%0Afrom+snapshots+join+outage_snapshots+on+snapshots.id+%3D+outage_snapshots.snapshot%0D%0Agroup+by+snapshots.id+order+by+snapshots.id+desc+limit+150#g.mark=line&amp;g.x_column=snapshotTime&amp;g.x_type=ordinal&amp;g.y_column=totalEstCustAffected&amp;g.y_type=quantitative">the number of estimated customers affected over time</a>.</p>
+
+<p><a href="https://static.simonwillison.net/static/2019/pge-outages-graph.png" style="text-decoration: none; border: none;"><img src="https://static.simonwillison.net/static/2019/pge-outages-graph.png" style="max-width: 100%"></a></p>
+
+<p>(I don’t know why there’s a dip towards the end of the graph).</p>
+
+<p>I also defined <a href="https://pge-outages.simonwillison.net/pge-outages/most_recent_snapshot">a SQL view</a> which shows all of the outages from the most recently captured snapshot (usually within the past 10 minutes if the PG&amp;E website hasn’t gone down) and renders them using <a href="https://github.com/simonw/datasette-cluster-map">datasette-cluster-map</a>.</p>
+
+<p><a href="https://static.simonwillison.net/static/2019/pge-map.jpg" style="text-decoration: none; border: none;"><img src="https://static.simonwillison.net/static/2019/pge-map.jpg" style="max-width: 100%"></a></p>
+
+<h3 id="thingstobeawareof">Things to be aware of</h3>
+
+<p>There are a huge amount of unanswered questions about this data. I’ve just been looking at PG&amp;E’s JSON and making guesses about what things like <code>estCustAffected</code> means. Without official documentation we can only guess as to how accurate this data is, or how it should be interpreted.</p>
+
+<p>Some things to question:</p>
+
+<ul>
+<li>What’s the quality of this data? Does it reflect accurately on what’s actually going on out there?</li>
+
+<li>What’s the exact meaning of the different columns—<code>estCustAffected</code>, <code>currentEtor</code>, <code>autoEtor</code>, <code>hazardFlag</code> etc?</li>
+
+<li>Various columns (<code>lastUpdateTime</code>, <code>currentEtor</code>, <code>autoEtor</code>) appear to be integer <a href="https://en.wikipedia.org/wiki/Unix_time">unix timestamps</a>. What timezone were they recorded in? Do they include DST etc?</li>
+</ul>
+
+<h3 id="howitworks">How it works</h3>
+
+<p>I originally wrote the scraper <a href="https://simonwillison.net/2017/Oct/10/fires-in-the-north-bay/">back in October 2017</a> during the North Bay fires, and moved it to run on Circle CI based on my work building <a href="https://simonwillison.net/2019/Mar/13/tree-history/">a commit history of San Francisco’s trees</a>.</p>
+
+<p>It’s pretty simple: every 10 minutes <a href="https://circleci.com/gh/simonw/disaster-scrapers">a Circle CI job</a> runs which scrapes <a href="https://apim.pge.com/cocoutage/outages/getOutagesRegions?regionType=city&amp;expand=true">the JSON feed</a> that powers the PG&amp;E website’s <a href="https://www.pge.com/myhome/outages/outage/index.shtml">outage map</a>.</p>
+
+<p>The JSON is then committed to my <a href="https://github.com/simonw/pge-outages">pge-outages GitHub repository</a>, over-writing the existing <a href="https://github.com/simonw/pge-outages/blob/master/pge-outages.json">pge-outages.json file</a>. There’s some code that attempts to generate a human-readable commit message, but the historic data itself is saved in the commit history of that single file.</p>
+
+<h3 id="buildingthedatasette">Building the Datasette</h3>
+
+    
 </body>
 </html>
