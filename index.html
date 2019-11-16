@@ -15,7 +15,12 @@
     
 <h3>The Data</h3>
     <p> Simon Willison has been scraping data from PG&E's website last few months. The data lives in his <a href="https://github.com/simonw/pge-outages/commits/master">github repository</a>.
-    Each snapshot contains: Location, Number of Customers, Cause, Time Stamp… 
+    Each snapshot contains: Time Stamp, Outage id, Location, Number of Customers, Cause, Crew Current Status... </br>
+    ['id', 'outage', 'outage_label', 'snapshot', 'snapshot_label',
+       'lastUpdateTime', 'currentEtor', 'autoEtor', 'estCustAffected',
+       'hazardFlag', 'latitude', 'longitude', 'regionName', 'regionName_label',
+	    'cause', 'cause_label', 'crewCurrentStatus', 'crewCurrentStatus_label'] </br>
+    [2367595 rows x 18 columns], 728.8 MB.
     </p>
    <a href="flow.jpg" style="text-decoration: none; border: none;">
     <img src="flow.jpg" width="350" height="400"></a> 
@@ -33,7 +38,7 @@ between 10pm and 7am.</li>
 </ul>
    
 <h3>October 2019</h3>
-    <p>For each snapshot I calculated the sum of all the affected customers.</p>
+    <p>For each snapshot the sum of all the affected customers was calculated.</p>
 <a href="october_all_outages.png" style="text-decoration: none; border: none;">
     <img src="october_all_outages.png" style="max-width: 100" vspace="40"></a>
 
@@ -69,6 +74,8 @@ between 10pm and 7am.</li>
 <ul>
     <li>Some (how many?) outages start labeled as "Unknown - PG&E will be assessing the cause", then change to "PG&E is investigating the cause of your outage", and later it might become "To protect public safety, power in your area has been turned off due to extreme weather conditions with high fire danger. Power will be restored as soon as it is safe to do so" (fire outage). Should we trace each outage (some of them appeared in more than a 1000 snapshots).
     </li>
+    <li>Data cleaning. How to identify and treat glitches.</li>
+	<li>Meaning and use of other fields.</li>
 </ul>
     
 </body>
