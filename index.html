@@ -15,7 +15,13 @@
     
 <h3>The Data</h3>
     <p> Simon Willison has been scraping data from PG&E's website last few months. The data lives in his <a href="https://github.com/simonw/pge-outages/commits/master">github repository</a>.
-    Each snapshot contains: Location, Number of Customers, Reason, Time Stamp… </p>
+    Each snapshot contains: Location, Number of Customers, Cause, Time Stamp… 
+    </p>
+   <a href="flow.png" style="text-decoration: none; border: none;">
+    <img src="flow.png" style="max-width: 100"></a> 
+    
+    
+    
     
 <h3>Findings</h3>
 <ul>
@@ -57,7 +63,13 @@ between 10pm and 7am.</li>
 <p>
 <a href="animation_scaled_oct_09.gif" style="text-decoration: none; border: none;">
     <img src="animation_scaled_oct_09.gif" style="max-width: 100%" vspace="60"></a></p>
+  
     
+<h3>Directions to explore</h3>
+<ul>
+    <li>Some (how many?) outages start labeled as "Unknown - PG&E will be assessing the cause", then change to "PG&E is investigating the cause of your outage", and later it might become "To protect public safety, power in your area has been turned off due to extreme weather conditions with high fire danger. Power will be restored as soon as it is safe to do so" (fire outage). Should we trace each outage (some of them appeared in more than a 1000 snapshots).
+    </li>
+</ul>
     
 </body>
 </html>
